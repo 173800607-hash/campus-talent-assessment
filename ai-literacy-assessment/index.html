@@ -349,6 +349,49 @@
     @page{margin:14mm}
   }
 .brand-mark{display:inline-flex;width:32px;height:32px;border-radius:50%;overflow:hidden;align-items:flex-start;justify-content:center;background:#fff;vertical-align:middle;flex:none}.brand-mark img{width:44px;height:44px;max-width:none;object-fit:cover;object-position:center top;transform:translateY(-2px)}
+  /* 手机窄屏：入口、选择题和报告保持一列，表格只在自身区域横向滚动。 */
+  @media(max-width:480px){
+    html,body{width:100%;max-width:100%;overflow-x:hidden}
+    .app{width:100%;max-width:100%;padding:0 14px calc(44px + env(safe-area-inset-bottom))}
+    .topbar{padding:12px 0 9px;gap:8px}
+    .brand{min-width:0;gap:7px;font-size:12px;white-space:nowrap}
+    .brand b{white-space:nowrap}
+    .topbar .tag{font-size:10px;padding:4px 7px;flex:none}
+    #s-home .hero{padding:16px 2px 4px}
+    #s-home .hero .eyebrow{font-size:11px;padding:7px 10px;margin-bottom:16px}
+    #s-home .hero h1{font-size:clamp(25px,7.3vw,31px);line-height:1.35}
+    #s-home .hero p:not(.eyebrow){font-size:13.5px;line-height:1.7}
+    .journey{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+    .journey div{min-width:0;min-height:52px;padding:4px 2px}
+    .journey b{font-size:12px}.journey span{font-size:10px;white-space:nowrap}
+    .picks{gap:12px;margin-top:17px}
+    .pick{padding:19px 18px;border-radius:16px}
+    .pick h3{font-size:20px;margin:0 0 5px}
+    .pick .quick-meta{margin:13px 0 14px;font-size:13px}
+    .setup{padding:20px 16px;margin-top:6px}
+    .chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+    .chip{width:100%;padding:10px 5px}
+    .qcard{padding:19px 16px}.qcard .stem{font-size:18px;line-height:1.55}
+    .opt{gap:10px;padding:12px;font-size:15px;overflow-wrap:anywhere}
+    .opt .k{flex-basis:27px;height:27px}
+    .rhero{padding:20px 16px}.rhero .big{font-size:40px}.rhero .lv{font-size:20px}
+    .sec{padding:17px 15px}.sec,.rhero,.qcard,.setup{min-width:0;overflow-wrap:anywhere}
+    .duo{grid-template-columns:minmax(0,1fr)}
+    .drow{grid-template-columns:minmax(78px,92px) minmax(0,1fr) 44px;gap:5px}
+    .drow .dn{white-space:normal;font-size:12px}
+    .drow .stars{font-size:12px;letter-spacing:0}
+    .kv{grid-template-columns:repeat(2,minmax(0,1fr))}.kv div{min-width:0;padding:9px}
+    .kv span{white-space:normal}.kv b{font-size:17px}
+    table.tbl{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    table.tbl th,table.tbl td{min-width:74px}
+    .tabs{display:flex;width:100%}.tabs button{flex:1;padding:10px 6px}
+    .hl,.warn{padding:13px 12px}
+    .acct{gap:8px}.acct .btn{width:100%}
+  }
+  .report-image-view{position:fixed;inset:0;z-index:100;background:#f4f7fc;overflow:auto;padding:12px 12px calc(24px + env(safe-area-inset-bottom))}
+  .report-image-view .image-toolbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-radius:12px;padding:9px 12px;margin-bottom:10px;box-shadow:0 3px 16px #15335a1a;font-size:13px;color:#425678}
+  .report-image-view .image-toolbar button{border:0;background:#eaf1ff;color:#0b3d91;border-radius:9px;padding:8px 12px;font:inherit;white-space:nowrap}
+  .report-image-view img{display:block;width:min(100%,780px);height:auto;margin:0 auto;background:#fff;box-shadow:0 3px 20px #15335a18;-webkit-touch-callout:default}
 </style>
 </head>
 <body>
@@ -1357,7 +1400,8 @@ function renderOrg(){
   '</div></div></div>' +
 
   '<div class="acct noprint">' +
-    '<a class="btn btn-ghost pdf-download" href="#" target="_blank" rel="noopener" onclick="if(this.dataset.ready!=1){event.preventDefault();return false}">正在准备 PDF…</a>' +
+    '<button class="btn btn-ghost pdf-download" type="button" onclick="saveReportPDF()" disabled>正在准备 PDF…</button>' +
+    '<button class="btn btn-ghost image-download" type="button" onclick="saveReportImage()" disabled>正在准备报告图片…</button>' +
     '<button class="btn btn-ghost" onclick="enter(\'org\')">换几个选项再测一次</button>' +
     '<button class="btn btn-ghost" onclick="go(\'home\')">回到首页</button>' +
   '</div>' +
@@ -1628,20 +1672,55 @@ function renderSchool(){
     (new URLSearchParams(location.search).get('view')==='teacher' ? '<button onclick="schoolTab(1,this)">教师报告</button></div>' : '') +
     schoolView(r, 0) + (new URLSearchParams(location.search).get('view')==='teacher' ? schoolView(r, 1) : '') +
     '<div class="acct noprint">' +
-      '<a class="btn btn-ghost pdf-download" href="#" target="_blank" rel="noopener" onclick="if(this.dataset.ready!=1){event.preventDefault();return false}">正在准备 PDF…</a>' +
+      '<button class="btn btn-ghost pdf-download" type="button" onclick="saveReportPDF()" disabled>正在准备 PDF…</button>' +
+      '<button class="btn btn-ghost image-download" type="button" onclick="saveReportImage()" disabled>正在准备报告图片…</button>' +
       '<button class="btn btn-ghost" onclick="enter(\'school\')">重新施测</button>' +
       '<button class="btn btn-ghost" onclick="go(\'home\')">回到首页</button>' +
     '</div>' +
     '<div class="foot">两页内容不同：学生页只给星级、六级阶梯与一条动作，教师页才有达成率、潜力实测、成长潜力区间与可信度说明。这是同一份作答，按用途拆分呈现。</div>';
 }
 
-let pdfBlobURL=null,pdfGeneration=0;
+let pdfBlobURL=null,pdfBlob=null,pdfFileName='',reportImageURL='',pdfGeneration=0;
+async function saveReportImage(){
+  if(!reportImageURL)return;
+  const imageBlob=await (await fetch(reportImageURL)).blob();
+  const fileName=pdfFileName.replace(/\.pdf$/i,'.jpg');
+  const file=typeof File==='function' ? new File([imageBlob],fileName,{type:'image/jpeg'}) : null;
+  if(file && navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:'AI 素养测评报告图片'});return}
+    catch(err){if(err.name==='AbortError')return;console.warn('图片分享不可用',err)}
+  }
+  const overlay=document.createElement('div');overlay.className='report-image-view';
+  const toolbar=document.createElement('div');toolbar.className='image-toolbar';
+  toolbar.innerHTML='<span>长按下方报告图片，可保存到手机相册</span><button type="button">关闭</button>';
+  toolbar.querySelector('button').onclick=()=>overlay.remove();
+  const img=document.createElement('img');img.src=reportImageURL;img.alt='AI 素养测评报告长图';
+  overlay.append(toolbar,img);document.body.appendChild(overlay);
+}
+async function saveReportPDF(){
+  if(!pdfBlob)return;
+  const file=typeof File==='function' ? new File([pdfBlob],pdfFileName,{type:'application/pdf'}) : null;
+  // 手机系统分享面板可把 PDF 存入“文件”、发送给老师或保存到其他应用。
+  if(file && navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:'AI 素养测评报告'});return}
+    catch(err){if(err.name==='AbortError')return;console.warn('文件分享不可用',err)}
+  }
+  // Android 浏览器和桌面浏览器使用下载属性，避免仅打开 blob 预览。
+  const a=document.createElement('a');
+  a.href=pdfBlobURL;a.download=pdfFileName;a.style.display='none';
+  document.body.appendChild(a);a.click();a.remove();
+  const hint=document.querySelector('#s-result .pdf-hint');
+  if(hint)hint.textContent='如当前应用没有保存文件，请点“预览 PDF”，在预览页使用右上角的分享或保存。';
+}
 async function prepareReportPDF(){
   const link=document.querySelector('#s-result .pdf-download');
   if(!link)return;
+  const imageButton=document.querySelector('#s-result .image-download');
   const generation=++pdfGeneration;
-  if(pdfBlobURL){URL.revokeObjectURL(pdfBlobURL);pdfBlobURL=null}
-  link.dataset.ready='0';link.href='#';link.textContent='正在准备 PDF…';
+  document.querySelector('#s-result .pdf-hint')?.remove();
+  if(pdfBlobURL){URL.revokeObjectURL(pdfBlobURL);pdfBlobURL=null;pdfBlob=null}
+  reportImageURL='';if(imageButton){imageButton.disabled=true;imageButton.textContent='正在准备报告图片…'}
+  link.disabled=true;link.textContent='正在准备 PDF…';
   if(!window.html2canvas||!window.jspdf){link.textContent='PDF 组件未加载，请刷新页面';return}
   const tv=document.getElementById('tv');
   const report=(tv && tv.style.display!=='none') ? tv : (document.getElementById('sv')||document.getElementById('result'));
@@ -1653,6 +1732,8 @@ async function prepareReportPDF(){
     }});
     if(generation!==pdfGeneration)return;
     if(!canvas.width||!canvas.height)throw Error('报告内容为空');
+    reportImageURL=canvas.toDataURL('image/jpeg',0.9);
+    if(imageButton){imageButton.disabled=false;imageButton.textContent='保存报告图片'}
     const pdf=new jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
     const contentW=190,contentH=277,margin=10;
     const sliceH=Math.floor(canvas.width*contentH/contentW);
@@ -1665,9 +1746,14 @@ async function prepareReportPDF(){
       pdf.addImage(part.toDataURL('image/jpeg',0.9),'JPEG',margin,margin,contentW,h*contentW/canvas.width);
     }
     const blob=pdf.output('blob');
-    pdfBlobURL=URL.createObjectURL(blob);
+    pdfBlob=blob;pdfBlobURL=URL.createObjectURL(blob);
     const safe=(S.name||'学员').replace(/[\\/:*?"<>|]/g,'').slice(0,16);
-    link.href=pdfBlobURL;link.dataset.ready='1';link.textContent='打开 PDF 报告（可下载）';
+    pdfFileName='AI素养测评报告-'+safe+'-'+today()+'.pdf';
+    link.disabled=false;link.textContent='保存／分享 PDF 报告';
+    const hint=document.createElement('div');hint.className='pdf-hint noprint';
+    hint.style.cssText='color:#667893;font-size:12px;margin:8px 0 0;';
+    hint.innerHTML='手机上可在系统分享面板中选“存储到文件”；在微信内也可用“保存报告图片”长按保存。 <a href="'+pdfBlobURL+'" target="_blank" rel="noopener" style="color:#3169dd">预览 PDF</a>';
+    link.parentElement.insertAdjacentElement('afterend',hint);
   }catch(err){console.error(err);if(generation===pdfGeneration)link.textContent='生成失败，请重新施测或刷新页面'}
 }
 
