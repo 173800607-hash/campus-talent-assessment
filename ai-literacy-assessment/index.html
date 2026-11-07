@@ -392,6 +392,8 @@
   .report-image-view .image-toolbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-radius:12px;padding:9px 12px;margin-bottom:10px;box-shadow:0 3px 16px #15335a1a;font-size:13px;color:#425678}
   .report-image-view .image-toolbar button{border:0;background:#eaf1ff;color:#0b3d91;border-radius:9px;padding:8px 12px;font:inherit;white-space:nowrap}
   .report-image-view img{display:block;width:min(100%,780px);height:auto;margin:0 auto;background:#fff;box-shadow:0 3px 20px #15335a18;-webkit-touch-callout:default}
+  .image-download,.pdf-hint{display:none!important}
+  @media(max-width:760px){.image-download{display:inline-flex!important}.pdf-hint{display:block!important}}
 </style>
 </head>
 <body>
@@ -1699,13 +1701,16 @@ async function saveReportImage(){
 }
 async function saveReportPDF(){
   if(!pdfBlob)return;
-  const file=typeof File==='function' ? new File([pdfBlob],pdfFileName,{type:'application/pdf'}) : null;
-  // 手机系统分享面板可把 PDF 存入“文件”、发送给老师或保存到其他应用。
-  if(file && navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-    try{await navigator.share({files:[file],title:'AI 素养测评报告'});return}
-    catch(err){if(err.name==='AbortError')return;console.warn('文件分享不可用',err)}
+  const onPhone=matchMedia('(max-width:760px)').matches;
+  if(onPhone && typeof File==='function'){
+    const file=new File([pdfBlob],pdfFileName,{type:'application/pdf'});
+    // 仅在手机上使用系统保存面板；电脑端始终直接下载。
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:'AI 素养测评报告'});return}
+      catch(err){if(err.name==='AbortError')return;console.warn('文件保存不可用',err)}
+    }
   }
-  // Android 浏览器和桌面浏览器使用下载属性，避免仅打开 blob 预览。
+  // 电脑端和不支持文件分享的浏览器，直接下载 PDF。
   const a=document.createElement('a');
   a.href=pdfBlobURL;a.download=pdfFileName;a.style.display='none';
   document.body.appendChild(a);a.click();a.remove();
@@ -1749,7 +1754,7 @@ async function prepareReportPDF(){
     pdfBlob=blob;pdfBlobURL=URL.createObjectURL(blob);
     const safe=(S.name||'学员').replace(/[\\/:*?"<>|]/g,'').slice(0,16);
     pdfFileName='AI素养测评报告-'+safe+'-'+today()+'.pdf';
-    link.disabled=false;link.textContent='保存／分享 PDF 报告';
+    link.disabled=false;link.textContent=matchMedia('(max-width:760px)').matches?'保存 PDF 报告':'下载报告 PDF';
     const hint=document.createElement('div');hint.className='pdf-hint noprint';
     hint.style.cssText='color:#667893;font-size:12px;margin:8px 0 0;';
     hint.innerHTML='手机上可在系统分享面板中选“存储到文件”；在微信内也可用“保存报告图片”长按保存。 <a href="'+pdfBlobURL+'" target="_blank" rel="noopener" style="color:#3169dd">预览 PDF</a>';
